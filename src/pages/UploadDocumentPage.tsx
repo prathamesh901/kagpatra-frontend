@@ -6,26 +6,45 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import * as pdfjsLib from "pdfjs-dist";
 
-// PDF.js worker setup (try CDN, then fallback to local)
-const setupPdfWorker = () => {
-  const CDN = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
-  const LOCAL = '/pdf.worker.js';
+// PDF.js worker setup (robust fallback: CDN -> local)
+const getPdfWorkerSrc = (fallback = false) => {
+  // Always use a protocol (Vite/SPAs may fail with `//` urls)
+  const version = pdfjsLib.version;
+  return fallback
+    ? "/pdf.worker.min.js"
+    : `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${version}/pdf.worker.min.js`;
+};
 
-  // Try to use CDN worker first
+const setupPdfWorker = async () => {
+  // Try CDN first, fallback to local if needed,
+  // and return 'true' if works else false
   try {
-    pdfjsLib.GlobalWorkerOptions.workerSrc = CDN;
-    // We'll verify the worker loads later via parsing
-  } catch (e) {
-    // If it fails (rare), try local fallback
+    pdfjsLib.GlobalWorkerOptions.workerSrc = getPdfWorkerSrc(false);
+    // Detect if worker actually works by trying to parse a dummy PDF buffer
+    // (Short buffer - single blank page)
+    const dummy = new Uint8Array([37, 80, 68, 70, 45]); // "%PDF-"
+    await pdfjsLib.getDocument({ data: dummy }).promise.catch(() => {});
+    return true;
+  } catch {
+    // Fallback to local
     try {
-      pdfjsLib.GlobalWorkerOptions.workerSrc = LOCAL;
-      // Could add a fetch to test LOCAL, but PDF.js will error if it fails
-    } catch (err) {
-      // Silent: pdf parsing will fail and show error toast
+      pdfjsLib.GlobalWorkerOptions.workerSrc = getPdfWorkerSrc(true);
+      const dummy = new Uint8Array([37, 80, 68, 70, 45]);
+      await pdfjsLib.getDocument({ data: dummy }).promise.catch(() => {});
+      return true;
+    } catch {
+      return false;
     }
   }
 };
-setupPdfWorker();
+// We only want to set this up once (further attempts can re-call)
+let pdfWorkerInitializedPromise: Promise<boolean> | null = null;
+const ensurePdfWorker = () => {
+  if (!pdfWorkerInitializedPromise) {
+    pdfWorkerInitializedPromise = setupPdfWorker();
+  }
+  return pdfWorkerInitializedPromise;
+};
 
 type UploadOption = "device" | "google" | null;
 
@@ -48,18 +67,36 @@ const UploadDocumentPage = () => {
     );
   };
 
-  // Parse PDF to get page count with enhanced error logging
+  // Parse PDF to get page count with enhanced robustness and fallback
   async function getPdfPageCount(file: File): Promise<number | null> {
     const buffer = await file.arrayBuffer();
-    try {
-      const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
-      return pdf.numPages;
-    } catch (e: any) {
-      // Log error for debugging
-      console.error("PDF.js failed to parse PDF:", e?.message ?? e);
-      setPdfError("Could not read PDF: " + (e?.message || "Unknown error"));
-      return null;
+    let triedFallback = false;
+    let lastError: any = null;
+    // Try original worker, then fallback if needed
+    for (let attempt = 0; attempt < 2; attempt++) {
+      if (attempt === 1) {
+        // Fallback on failed first attempt
+        pdfjsLib.GlobalWorkerOptions.workerSrc = getPdfWorkerSrc(true);
+        triedFallback = true;
+      }
+      try {
+        const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+        return pdf.numPages;
+      } catch (e: any) {
+        lastError = e;
+        if (
+          String(e?.message || e).includes("Setting up fake worker failed")
+          || String(e?.message || e).includes("Failed to fetch dynamically")
+        ) {
+          // Worker load failed, try fallback
+          continue;
+        }
+        break;
+      }
     }
+    // If failed both attempts:
+    setPdfError("Could not read PDF: " + (lastError?.message || "Unknown error. If this is a PDF, please ensure the file isn't encrypted or damaged. If the error persists, please try another file or check if the worker file exists at /pdf.worker.min.js."));
+    return null;
   }
 
   // Handle selection and trigger file picker for device
@@ -85,6 +122,8 @@ const UploadDocumentPage = () => {
     setLoadingPages(true);
 
     if (isPdf(file)) {
+      // Ensure worker is ready (awaits the global worker promise)
+      await ensurePdfWorker();
       // Try to count pdf pages
       const pages = await getPdfPageCount(file);
       setNumPages(pages ?? null);
@@ -98,7 +137,9 @@ const UploadDocumentPage = () => {
       } else {
         toast({
           title: "Could not read PDF",
-          description: "PDF parsing failed. Please try another file.",
+          description:
+            pdfError ||
+            "PDF parsing failed. Please check your network or ensure /pdf.worker.min.js is present.",
           variant: "destructive",
         });
       }
@@ -279,4 +320,6 @@ const UploadDocumentPage = () => {
 };
 
 export default UploadDocumentPage;
+
+// --- End of UploadDocumentPage.tsx ---
 
