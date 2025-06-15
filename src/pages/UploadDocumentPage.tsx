@@ -1,4 +1,3 @@
-
 import { useRef, useState } from "react";
 import { ChevronLeft, Upload, FileStack, Trash } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -89,14 +88,6 @@ const UploadDocumentPage = () => {
       <p className="text-gray-400 text-base px-4 pb-0 text-center mb-2">
         Choose a source to upload your document for printing.
       </p>
-      {/* File info above cards if available */}
-      {(uploadedFile && (selected === "device")) && (
-        <div className="w-full flex flex-col items-center mb-2">
-          <span className="text-base font-semibold text-black">{uploadedFile.name}</span>
-          <span className="text-xs text-gray-400">1 page</span>
-        </div>
-      )}
-
       {/* Upload options */}
       <div className="flex flex-col gap-4 px-5 mt-2 mb-6">
         {/* Upload from Device */}
@@ -181,4 +172,3 @@ const UploadDocumentPage = () => {
 };
 
 export default UploadDocumentPage;
-
