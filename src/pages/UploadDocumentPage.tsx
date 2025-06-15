@@ -1,3 +1,4 @@
+
 import { useRef, useState } from "react";
 import { ChevronLeft, Upload, FileStack, Trash } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -25,12 +26,11 @@ const UploadDocumentPage = () => {
     // For Google, do nothing on click (show toast on Continue)
   };
 
-  // On file selected (no PDF detection/logic)
+  // On file selected: set uploaded file and always set to 1 page
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploadedFile(file);
-    setNumPages(1);
 
     toast({
       title: "File selected",
@@ -50,7 +50,7 @@ const UploadDocumentPage = () => {
   // Handle Continue logic
   const handleContinue = () => {
     if (selected === "device") {
-      if (uploadedFile && numPages === 1) {
+      if (uploadedFile) {
         // Send file info to SetPrintPreferencesPage
         navigate("/set-print-preferences", {
           state: {
@@ -181,3 +181,4 @@ const UploadDocumentPage = () => {
 };
 
 export default UploadDocumentPage;
+
