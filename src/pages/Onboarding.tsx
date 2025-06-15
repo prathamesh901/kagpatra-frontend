@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -21,7 +20,7 @@ const slides = [
     description: "Choose color, paper size, quality, and number of copies just the way you need it.",
   },
   {
-    img: "/lovable-uploads/ae8bcaa6-7736-4f9d-ab1c-f9c6dfda3651.png",
+    img: "/lovable-uploads/7bfdaa92-8efd-4ba8-8c86-d21b4775bbaf.png?v=" + Date.now(),
     title: "Pay & Print Instantly",
     description: "Use UPI, wallet, or card for quick and secure payments before you print.",
   },
