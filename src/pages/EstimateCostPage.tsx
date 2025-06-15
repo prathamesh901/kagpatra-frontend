@@ -6,10 +6,20 @@ import { cn } from "@/lib/utils";
 import { FileText } from "lucide-react";
 import TabBar from "@/components/TabBar";
 
-// Simple dummy cost logic
-function getEstimatedCost({ pages, color, copies, doubleSided }: { pages: number; color: "bw" | "color"; copies: number; doubleSided: boolean; }) {
-  let base = color === "color" ? 5 : 2;
-  let sidesAdj = doubleSided ? 0.8 : 1;
+// Updated cost logic: b/w = ₹5, color = ₹10, double-sided doubles the cost
+function getEstimatedCost({
+  pages,
+  color,
+  copies,
+  doubleSided,
+}: {
+  pages: number;
+  color: "bw" | "color";
+  copies: number;
+  doubleSided: boolean;
+}) {
+  let base = color === "color" ? 10 : 5;
+  let sidesAdj = doubleSided ? 2 : 1;
   return Math.round(base * pages * copies * sidesAdj * 100) / 100;
 }
 
