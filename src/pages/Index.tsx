@@ -3,23 +3,25 @@ import { Printer, DollarSign } from "lucide-react";
 import ActionCard from "@/components/ActionCard";
 import PrintJobCard from "@/components/PrintJobCard";
 import TabBar from "@/components/TabBar";
+import { useNavigate } from "react-router-dom";
 
 const mockPrintJobs = [
   {
     filename: "Project Proposal.pdf",
     datetime: "2025-06-15 10:30 AM",
-    status: "Completed",
+    status: "Completed" as const,
     receiptUrl: "#",
   },
   {
     filename: "Project Proposal.pdf",
     datetime: "2025-06-15 10:30 AM",
-    status: "Completed",
+    status: "Completed" as const,
     receiptUrl: "#",
   },
 ];
 
 const Index = () => {
+  const navigate = useNavigate();
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 pt-5 pb-[64px] sm:pb-0">
       {/* Main content container */}
@@ -37,7 +39,6 @@ const Index = () => {
         <p className="text-gray-400 font-normal text-base mb-4">
           Welcome back to Kagpatra. Ready to print?
         </p>
-
         {/* Start Printing Card */}
         <div className="rounded-2xl border border-gray-200 bg-white px-5 py-7 flex flex-col items-center justify-center mb-6 shadow-sm">
           <div className="flex justify-center items-center mb-2">
@@ -49,13 +50,13 @@ const Index = () => {
           <div className="mb-1 font-semibold text-lg text-black">Start Printing</div>
           <div className="text-gray-400 text-base font-normal">Scan kiosk QR to begin</div>
         </div>
-
         {/* Quick Actions */}
         <div className="grid grid-cols-2 gap-3 mb-7">
           <ActionCard
             icon={<DollarSign size={28} strokeWidth={2.3} />}
             title="Estimate Cost"
             description="Get an estimate for your print job."
+            onClick={() => navigate("/estimate")}
           />
           <ActionCard
             icon={<Printer size={27} strokeWidth={2.3} />}
@@ -63,7 +64,6 @@ const Index = () => {
             description="Locate available printing kiosks."
           />
         </div>
-
         {/* Recent Print Jobs */}
         <div>
           <div className="font-bold text-lg text-black mb-3">Recent Print Jobs</div>
