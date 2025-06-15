@@ -1,15 +1,10 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { FileText } from "lucide-react";
-
-const minPages = 1;
-const maxPages = 100;
-const minCopies = 1;
-const maxCopies = 100;
+import TabBar from "@/components/TabBar";
 
 // Simple dummy cost logic
 function getEstimatedCost({ pages, color, copies, doubleSided }: { pages: number; color: "bw" | "color"; copies: number; doubleSided: boolean; }) {
@@ -17,6 +12,11 @@ function getEstimatedCost({ pages, color, copies, doubleSided }: { pages: number
   let sidesAdj = doubleSided ? 0.8 : 1;
   return Math.round(base * pages * copies * sidesAdj * 100) / 100;
 }
+
+const minPages = 1;
+const maxPages = 100;
+const minCopies = 1;
+const maxCopies = 100;
 
 const EstimateCostPage = () => {
   const navigate = useNavigate();
