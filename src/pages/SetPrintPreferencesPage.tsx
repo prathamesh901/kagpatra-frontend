@@ -1,8 +1,8 @@
-
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, Minus, Plus, FileText } from "lucide-react";
 

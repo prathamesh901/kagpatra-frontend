@@ -1,4 +1,3 @@
-
 import { useRef, useState } from "react";
 // Only allowed Lucide icons based on context
 import { ChevronLeft, Upload, FileStack, Trash } from "lucide-react";
@@ -6,7 +5,9 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import * as pdfjsLib from "pdfjs-dist";
-import "pdfjs-dist/build/pdf.worker.entry";
+
+// Set up PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 type UploadOption = "device" | "google" | null;
 
