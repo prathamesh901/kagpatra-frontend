@@ -7,11 +7,11 @@ const PrintConfirmationPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Get previous print details if available
+  // Get previous print details from location.state
   const {
-    uploadedFileName = "Resume.pdf", // fallback name
-    totalPaid = 16,
-    printTime = "2 mins ago",
+    uploadedFileName,
+    totalPaid,
+    printTime = "—", // We will implement actual print time calculation later
   } = (location.state || {}) as {
     uploadedFileName?: string;
     totalPaid?: number | string;
@@ -40,7 +40,7 @@ const PrintConfirmationPage = () => {
                 <rect x="6" y="3" width="12" height="18" rx="2.3" stroke="#4664ea" strokeWidth="1.6"/>
                 <path d="M8 7h8M8 11h8M8 15h5" stroke="#4664ea" strokeWidth="1.2" strokeLinecap="round"/>
               </svg>
-              <span className="text-gray-400">File Name: <span className="text-gray-700">{uploadedFileName}</span></span>
+              <span className="text-gray-400">File Name: <span className="text-gray-700">{uploadedFileName || "—"}</span></span>
             </div>
             <div className="flex items-center gap-3">
               {/* Clock Icon */}
@@ -57,7 +57,11 @@ const PrintConfirmationPage = () => {
                 <rect x="14.5" y="11" width="2.5" height="2" rx="1" fill="#4664ea"/>
               </svg>
               <span className="text-gray-400">
-                Total Paid: <span className="text-gray-700 font-medium">₹{Number(totalPaid).toFixed(2)}</span>
+                Total Paid: <span className="text-gray-700 font-medium">
+                  {typeof totalPaid !== "undefined"
+                    ? `₹${Number(totalPaid).toFixed(2)}`
+                    : "—"}
+                </span>
               </span>
             </div>
           </div>
