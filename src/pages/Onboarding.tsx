@@ -16,7 +16,7 @@ const slides = [
     description: "Upload documents from your phone, Google Drive, or scan a QR from another device.",
   },
   {
-    img: "/lovable-uploads/6a9fa08b-9032-4c1d-8b37-e444a6622a30.png",
+    img: "/lovable-uploads/4a2d0d7a-9a59-4f64-b666-8fcff38af22b.png?v=" + Date.now(),
     title: "Customize Your Print",
     description: "Choose color, paper size, quality, and number of copies just the way you need it.",
   },
