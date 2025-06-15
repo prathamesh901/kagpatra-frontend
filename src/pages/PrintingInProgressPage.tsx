@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Printer, Check } from "lucide-react";
@@ -35,6 +34,7 @@ const PrintingInProgressPage = () => {
   const navigate = useNavigate();
   const [step, setStep] = React.useState(0);
 
+  // Automatically advance steps and finally redirect to confirmation page
   React.useEffect(() => {
     if (step === 0) {
       const timer = setTimeout(() => setStep(1), 2000);
@@ -42,9 +42,21 @@ const PrintingInProgressPage = () => {
     } else if (step === 1) {
       const timer = setTimeout(() => setStep(2), 3000);
       return () => clearTimeout(timer);
+    } else if (step === 2) {
+      // Wait 2 seconds at step "Done", then navigate to confirmation
+      const timer = setTimeout(() => {
+        navigate("/print-confirmation", {
+          state: {
+            // You can pass print details here if you want
+            uploadedFileName: "Resume.pdf",
+            totalPaid: 16,
+            printTime: "2 mins ago",
+          }
+        });
+      }, 2000);
+      return () => clearTimeout(timer);
     }
-    // if step 2 (Done) do nothing.
-  }, [step]);
+  }, [step, navigate]);
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -167,12 +179,7 @@ const PrintingInProgressPage = () => {
             Report an issue
           </Button>
         ) : (
-          <Button
-            className="px-8 py-2 rounded-full bg-green-600 text-white font-medium text-base pointer-events-auto shadow-lg hover:bg-green-700 transition"
-            onClick={() => navigate("/")}
-          >
-            Go Home
-          </Button>
+          <div className="h-11" /> // Spacer to keep layout consistent
         )}
       </div>
     </div>

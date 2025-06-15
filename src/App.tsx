@@ -13,6 +13,7 @@ import UploadDocumentPage from "./pages/UploadDocumentPage";
 import SetPrintPreferencesPage from "./pages/SetPrintPreferencesPage";
 import PaymentPage from "./pages/PaymentPage";
 import PrintingInProgressPage from "./pages/PrintingInProgressPage";
+import PrintConfirmationPage from "./pages/PrintConfirmationPage";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/set-print-preferences" element={<SetPrintPreferencesPage />} />
           <Route path="/payment" element={<PaymentPage />} />
           <Route path="/printing" element={<PrintingInProgressPage />} />
+          <Route path="/print-confirmation" element={<PrintConfirmationPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
