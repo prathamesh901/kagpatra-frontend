@@ -1,15 +1,16 @@
-
 import { useRef, useState } from "react";
 import { ChevronLeft, Upload, FileStack, Trash } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import * as pdfjsLib from "pdfjs-dist";
-// Direct worker import - this is the ONLY reliable way in Vite/React
-import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
+
+// Manually import worker as an ES module worker (Vite will handle this!)
+// @ts-ignore
+import pdfWorker from "pdfjs-dist/build/pdf.worker.js?worker";
 
 // Set the worker source ONCE
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 
 type UploadOption = "device" | "google" | null;
 
@@ -261,5 +262,3 @@ const UploadDocumentPage = () => {
 };
 
 export default UploadDocumentPage;
-
-// --- End of UploadDocumentPage.tsx ---
