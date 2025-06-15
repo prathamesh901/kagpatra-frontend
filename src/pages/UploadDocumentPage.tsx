@@ -1,6 +1,6 @@
 
 import { useRef, useState } from "react";
-import { ChevronLeft, Upload, FileStack } from "lucide-react";
+import { ChevronLeft, Upload, FileStack, Trash } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
@@ -33,6 +33,15 @@ const UploadDocumentPage = () => {
         description: `Selected: ${e.target.files[0].name}`
       });
     }
+  };
+
+  // Handler to remove file
+  const handleDeleteFile = () => {
+    setUploadedFile(null);
+    toast({
+      title: "Removed",
+      description: "The uploaded file has been removed",
+    });
   };
 
   // Handle Continue logic
@@ -78,7 +87,7 @@ const UploadDocumentPage = () => {
       </p>
 
       {/* Upload options */}
-      <div className="flex flex-col gap-4 px-5 mt-2 mb-10">
+      <div className="flex flex-col gap-4 px-5 mt-2 mb-6">
         {/* Upload from Device */}
         <button
           className={`flex items-center w-full border rounded-2xl bg-white px-5 py-4 shadow-sm transition focus:outline-none ${
@@ -134,6 +143,23 @@ const UploadDocumentPage = () => {
           </div>
         </button>
       </div>
+      {/* Uploaded file display */}
+      {selected === "device" && uploadedFile && (
+        <div className="flex items-center justify-between bg-gray-50 border border-gray-200 w-[90%] max-w-md mx-auto rounded-xl px-4 py-3 mb-4 text-black">
+          <div>
+            <span className="block font-medium text-sm mb-1 text-gray-500">Your uploaded file</span>
+            <span className="text-base font-semibold">{uploadedFile.name}</span>
+          </div>
+          <button
+            type="button"
+            onClick={handleDeleteFile}
+            className="ml-4 text-red-500 hover:text-red-700 transition-colors rounded-full p-2"
+            aria-label="Delete file"
+          >
+            <Trash size={22} />
+          </button>
+        </div>
+      )}
       {/* Bottom button */}
       <div className="fixed bottom-5 left-0 w-full flex justify-center pointer-events-none z-10">
         <Button
