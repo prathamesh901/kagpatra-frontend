@@ -16,6 +16,7 @@ import PrintingInProgressPage from "./pages/PrintingInProgressPage";
 import PrintConfirmationPage from "./pages/PrintConfirmationPage";
 import SplashScreen from "./pages/SplashScreen";
 import Onboarding from "./pages/Onboarding";
+import ViewReceiptPage from "./pages/ViewReceiptPage";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
           <Route path="/payment" element={<PaymentPage />} />
           <Route path="/printing" element={<PrintingInProgressPage />} />
           <Route path="/print-confirmation" element={<PrintConfirmationPage />} />
+          <Route path="/view-receipt" element={<ViewReceiptPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
