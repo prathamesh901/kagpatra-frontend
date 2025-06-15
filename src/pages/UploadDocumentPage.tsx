@@ -3,13 +3,6 @@ import { ChevronLeft, Upload, FileStack, Trash } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
-import * as pdfjsLib from "pdfjs-dist";
-
-// Remove manual worker import and set, let pdfjs use its built-in worker (Vite will inline it)
-// (Remove the following two lines:)
-// // @ts-ignore
-// import pdfWorker from "pdfjs-dist/build/pdf.worker.js?worker";
-// pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 
 type UploadOption = "device" | "google" | null;
 
@@ -19,37 +12,12 @@ const UploadDocumentPage = () => {
   const navigate = useNavigate();
   const [selected, setSelected] = useState<UploadOption>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [numPages, setNumPages] = useState<number | null>(null);
-  const [loadingPages, setLoadingPages] = useState(false);
-  const [pdfError, setPdfError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Helper: robust PDF file detection
-  const isPdf = (file: File) => {
-    return (
-      file.type === "application/pdf" ||
-      file.name.toLowerCase().endsWith(".pdf")
-    );
-  };
-
-  // Parse PDF to get page count
-  async function getPdfPageCount(file: File): Promise<number | null> {
-    const buffer = await file.arrayBuffer();
-    try {
-      const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
-      return pdf.numPages;
-    } catch (e: any) {
-      setPdfError("Could not read PDF: " + (e?.message || "Unknown error. If this is a PDF, please ensure the file isn't encrypted or damaged."));
-      return null;
-    }
-  }
 
   // Handle selection and trigger file picker for device
   const handleCardClick = (option: UploadOption) => {
     setSelected(option);
     setUploadedFile(null);
-    setNumPages(null);
-    setPdfError(null);
     if (option === "device" && fileInputRef.current) {
       fileInputRef.current.value = "";
       fileInputRef.current.click();
@@ -57,50 +25,22 @@ const UploadDocumentPage = () => {
     // For Google, do nothing on click (show toast on Continue)
   };
 
-  // On file selected
+  // On file selected (no PDF detection/logic)
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploadedFile(file);
-    setNumPages(null);
-    setPdfError(null);
-    setLoadingPages(true);
+    setNumPages(1);
 
-    if (isPdf(file)) {
-      const pages = await getPdfPageCount(file);
-      setNumPages(pages ?? null);
-      setLoadingPages(false);
-
-      if (pages) {
-        toast({
-          title: "File selected",
-          description: `Selected: ${file.name} (${pages} page${pages > 1 ? "s" : ""})`,
-        });
-      } else {
-        toast({
-          title: "Could not read PDF",
-          description:
-            pdfError ||
-            "PDF parsing failed. Please check your file and try again.",
-          variant: "destructive",
-        });
-      }
-    } else {
-      // Default to 1 page for non-pdfs
-      setNumPages(1);
-      setLoadingPages(false);
-      toast({
-        title: "File selected",
-        description: `Selected: ${file.name}`,
-      });
-    }
+    toast({
+      title: "File selected",
+      description: `Selected: ${file.name} (1 page)`,
+    });
   };
 
   // Handler to remove file
   const handleDeleteFile = () => {
     setUploadedFile(null);
-    setNumPages(null);
-    setPdfError(null);
     toast({
       title: "Removed",
       description: "The uploaded file has been removed",
@@ -110,19 +50,13 @@ const UploadDocumentPage = () => {
   // Handle Continue logic
   const handleContinue = () => {
     if (selected === "device") {
-      if (uploadedFile && numPages != null && !pdfError) {
+      if (uploadedFile && numPages === 1) {
         // Send file info to SetPrintPreferencesPage
         navigate("/set-print-preferences", {
           state: {
             uploadedFileName: uploadedFile.name,
-            numPages: numPages,
+            numPages: 1,
           },
-        });
-      } else if (pdfError) {
-        toast({
-          title: "PDF parsing error",
-          description: pdfError,
-          variant: "destructive",
         });
       } else {
         toast({
@@ -159,21 +93,7 @@ const UploadDocumentPage = () => {
       {(uploadedFile && (selected === "device")) && (
         <div className="w-full flex flex-col items-center mb-2">
           <span className="text-base font-semibold text-black">{uploadedFile.name}</span>
-          <span className="text-xs text-gray-400">
-            {loadingPages
-              ? "Detecting pages..."
-              : numPages != null
-                ? `${numPages} page${numPages !== 1 ? "s" : ""}`
-                : pdfError
-                ? pdfError
-                : null}
-          </span>
-        </div>
-      )}
-
-      {pdfError && (
-        <div className="text-xs text-red-500 text-center mb-2">
-          <strong>PDF error:</strong> {pdfError}
+          <span className="text-xs text-gray-400">1 page</span>
         </div>
       )}
 
@@ -251,7 +171,7 @@ const UploadDocumentPage = () => {
         <Button
           className="w-[90%] max-w-md mx-auto h-12 rounded-full bg-blue-600 text-white font-medium text-lg pointer-events-auto shadow-lg"
           onClick={handleContinue}
-          disabled={!selected || (selected === "device" && (!uploadedFile || !numPages || !!pdfError))}
+          disabled={!selected || (selected === "device" && (!uploadedFile))}
         >
           Continue
         </Button>
