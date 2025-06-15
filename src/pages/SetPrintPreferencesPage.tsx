@@ -23,8 +23,8 @@ const getEstimatedCost = ({
   doubleSided: boolean;
 }) => {
   let pricePerPage = color === "color" ? 10 : 5; // ₹10 for color, ₹5 for b/w
-  let sidesAdj = doubleSided ? 0.5 : 1;
-  // Double-sided is 50% cheaper for demonstration
+  let sidesAdj = doubleSided ? 2 : 1;
+  // Double-sided now doubles the cost if selected
   return Math.round(pricePerPage * pages * copies * sidesAdj * 100) / 100;
 };
 
