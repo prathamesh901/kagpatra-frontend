@@ -1,15 +1,27 @@
 
 import { FileText } from "lucide-react";
 
+// Add optional 'variant' prop
 interface PrintJob {
   filename: string;
   datetime: string;
   status: "Completed" | "Pending";
   receiptUrl?: string;
 }
+interface PrintJobCardProps {
+  job: PrintJob;
+  variant?: "profile";
+}
 
-const PrintJobCard = ({ job }: { job: PrintJob }) => (
-  <div className="flex items-center bg-white border border-gray-200 rounded-2xl px-4 py-4 mb-4 shadow-sm">
+const PrintJobCard = ({ job, variant }: PrintJobCardProps) => (
+  <div
+    className={
+      variant === "profile"
+        ? "flex items-center bg-white border border-gray-200 rounded-2xl px-4 py-4 shadow-sm"
+        : "flex items-center bg-white border border-gray-200 rounded-2xl px-4 py-4 mb-4 shadow-sm"
+    }
+    style={variant === "profile" ? { borderColor: "#ECECEC", marginBottom: 0 } : undefined}
+  >
     <div className="text-blue-500 mr-3">
       <FileText size={28} strokeWidth={2.3} />
     </div>
@@ -20,7 +32,9 @@ const PrintJobCard = ({ job }: { job: PrintJob }) => (
     <div className="flex flex-col items-end ml-2 space-y-1 min-w-[110px]">
       <span
         className={
-          job.status === "Completed"
+          variant === "profile"
+            ? "bg-green-100/70 text-green-700 text-xs font-semibold px-3 py-1 rounded-full mb-0.5"
+            : job.status === "Completed"
             ? "bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full mb-0.5"
             : "bg-gray-100 text-gray-600 text-xs font-semibold px-3 py-1 rounded-full mb-0.5"
         }
@@ -29,7 +43,11 @@ const PrintJobCard = ({ job }: { job: PrintJob }) => (
       </span>
       <a
         href={job.receiptUrl || "#"}
-        className="text-blue-500 bg-blue-50 hover:bg-blue-100 transition px-3 py-1 rounded-full text-xs font-medium inline-block"
+        className={
+          variant === "profile"
+            ? "text-blue-500 bg-blue-50/60 hover:bg-blue-100 transition px-3 py-1 rounded-full text-xs font-medium inline-block"
+            : "text-blue-500 bg-blue-50 hover:bg-blue-100 transition px-3 py-1 rounded-full text-xs font-medium inline-block"
+        }
       >
         View Receipt
       </a>
@@ -38,4 +56,3 @@ const PrintJobCard = ({ job }: { job: PrintJob }) => (
 );
 
 export default PrintJobCard;
-
