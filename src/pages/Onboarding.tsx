@@ -5,7 +5,7 @@ import { ChevronLeft } from "lucide-react";
 
 const slides = [
   {
-    img: "/lovable-uploads/0278541b-bc2c-42e0-bae6-153ab4f4c11c.png?v=" + Date.now(),
+    img: "/lovable-uploads/2bfe247f-f532-4f52-b7d0-801f29780844.png?v=" + Date.now(),
     title: "Scan to Begin",
     description: "Scan the QR code on any Kagpatra kiosk using our app to start your print session.",
   },
