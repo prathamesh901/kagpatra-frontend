@@ -14,6 +14,8 @@ import SetPrintPreferencesPage from "./pages/SetPrintPreferencesPage";
 import PaymentPage from "./pages/PaymentPage";
 import PrintingInProgressPage from "./pages/PrintingInProgressPage";
 import PrintConfirmationPage from "./pages/PrintConfirmationPage";
+import SplashScreen from "./pages/SplashScreen";
+import Onboarding from "./pages/Onboarding";
 
 const queryClient = new QueryClient();
 
@@ -24,7 +26,11 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
+          {/* Splash and Onboarding routes */}
+          <Route path="/" element={<SplashScreen />} />
+          <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/home" element={<Index />} />
+          {/* Main app routes */}
           <Route path="/estimate" element={<EstimateCostPage />} />
           <Route path="/kiosks" element={<NearbyKiosksPage />} />
           <Route path="/profile" element={<ProfilePage />} />
