@@ -6,14 +6,14 @@ import { ChevronLeft } from "lucide-react";
 
 const slides = [
   {
+    img: "/lovable-uploads/ae8bcaa6-7736-4f9d-ab1c-f9c6dfda3651.png",
+    title: "Scan to Begin",
+    description: "Scan the QR code on any Kagpatra kiosk using our app to start your print session.",
+  },
+  {
     img: "/lovable-uploads/5e40d423-e861-430b-9a89-21834be40351.png",
     title: "Upload from Anywhere",
     description: "Upload documents from your phone, Google Drive, or scan a QR from another device.",
-  },
-  {
-    img: "/lovable-uploads/ae8bcaa6-7736-4f9d-ab1c-f9c6dfda3651.png",
-    title: "Pay & Print Instantly",
-    description: "Use UPI, wallet, or card for quick and secure payments before you print.",
   },
   {
     img: "/lovable-uploads/6a9fa08b-9032-4c1d-8b37-e444a6622a30.png",
@@ -22,8 +22,8 @@ const slides = [
   },
   {
     img: "/lovable-uploads/ae8bcaa6-7736-4f9d-ab1c-f9c6dfda3651.png",
-    title: "Scan to Begin",
-    description: "Scan the QR code on any Kagpatra kiosk using our app to start your print session.",
+    title: "Pay & Print Instantly",
+    description: "Use UPI, wallet, or card for quick and secure payments before you print.",
   },
 ];
 
