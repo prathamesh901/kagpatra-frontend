@@ -1,19 +1,12 @@
-
 import { ChevronLeft, Upload, Cloud, FileStack } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-
 const UploadDocumentPage = () => {
   const navigate = useNavigate();
-  return (
-    <div className="min-h-screen bg-white flex flex-col px-0 pt-4 pb-4 relative">
+  return <div className="min-h-screen bg-white flex flex-col px-0 pt-4 pb-4 relative">
       {/* Header */}
       <div className="flex items-center mb-2 px-4">
-        <button
-          onClick={() => navigate(-1)}
-          className="mr-2 p-1 rounded hover:bg-gray-100"
-          aria-label="Back"
-        >
+        <button onClick={() => navigate(-1)} className="mr-2 p-1 rounded hover:bg-gray-100" aria-label="Back">
           <ChevronLeft size={28} className="text-black" />
         </button>
         <h1 className="text-xl font-bold text-black flex-1 text-center pr-8">
@@ -33,7 +26,7 @@ const UploadDocumentPage = () => {
           </span>
           <div className="flex flex-col items-start">
             <span className="font-semibold text-base text-black">Upload from Device</span>
-            <span className="text-gray-400 text-sm mt-0.5">Select a document directly from your phone or tablet.</span>
+            <span className="text-gray-400 text-sm mt-0.5 text-left">Select a document directly from your phone or tablet.</span>
           </div>
         </button>
         <button className="flex items-center w-full border border-gray-300 rounded-2xl bg-white px-5 py-4 shadow-sm hover:border-blue-400 transition focus:outline-none">
@@ -42,7 +35,7 @@ const UploadDocumentPage = () => {
           </span>
           <div className="flex flex-col items-start">
             <span className="font-semibold text-base text-black">Import from Google Drive</span>
-            <span className="text-gray-400 text-sm mt-0.5">Access your documents stored in Google Drive</span>
+            <span className="text-gray-400 text-sm mt-0.5 text-left">Access your documents stored in Google Drive</span>
           </div>
         </button>
       </div>
@@ -50,8 +43,6 @@ const UploadDocumentPage = () => {
       <div className="fixed bottom-5 left-0 w-full flex justify-center pointer-events-none z-10">
         <Button className="w-[90%] max-w-md mx-auto h-12 rounded-full bg-blue-600 text-white font-medium text-lg pointer-events-auto shadow-lg">Continue</Button>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default UploadDocumentPage;
