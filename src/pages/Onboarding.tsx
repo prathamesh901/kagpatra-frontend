@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,7 @@ import { ChevronLeft } from "lucide-react";
 
 const slides = [
   {
-    img: "/lovable-uploads/ae8bcaa6-7736-4f9d-ab1c-f9c6dfda3651.png",
+    img: "/lovable-uploads/0278541b-bc2c-42e0-bae6-153ab4f4c11c.png",
     title: "Scan to Begin",
     description: "Scan the QR code on any Kagpatra kiosk using our app to start your print session.",
   },
