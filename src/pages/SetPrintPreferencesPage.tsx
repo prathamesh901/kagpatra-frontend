@@ -183,10 +183,13 @@ const SetPrintPreferencesPage = () => {
         <Button
           className="w-[90%] max-w-md mx-auto h-12 rounded-full bg-blue-600 text-white font-medium text-lg pointer-events-auto shadow-lg"
           onClick={() => {
-            // You might handle order submit here
-            toast({
-              title: "Order not implemented",
-              description: "This is just a demo.",
+            // go to payment page, passing relevant info
+            navigate("/payment", {
+              state: {
+                uploadedFileName,
+                numPages,
+                estimatedCost,
+              },
             });
           }}
         >

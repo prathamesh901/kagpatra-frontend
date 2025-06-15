@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,6 +11,7 @@ import ProfilePage from "./pages/ProfilePage";
 import ScanQRCodePage from "./pages/ScanQRCodePage";
 import UploadDocumentPage from "./pages/UploadDocumentPage";
 import SetPrintPreferencesPage from "./pages/SetPrintPreferencesPage";
+import PaymentPage from "./pages/PaymentPage";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +29,7 @@ const App = () => (
           <Route path="/scan" element={<ScanQRCodePage />} />
           <Route path="/upload" element={<UploadDocumentPage />} />
           <Route path="/set-print-preferences" element={<SetPrintPreferencesPage />} />
+          <Route path="/payment" element={<PaymentPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
