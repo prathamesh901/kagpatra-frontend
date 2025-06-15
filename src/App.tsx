@@ -11,6 +11,7 @@ import NearbyKiosksPage from "./pages/NearbyKiosksPage";
 import ProfilePage from "./pages/ProfilePage";
 import ScanQRCodePage from "./pages/ScanQRCodePage";
 import UploadDocumentPage from "./pages/UploadDocumentPage";
+import SetPrintPreferencesPage from "./pages/SetPrintPreferencesPage";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/scan" element={<ScanQRCodePage />} />
           <Route path="/upload" element={<UploadDocumentPage />} />
+          <Route path="/set-print-preferences" element={<SetPrintPreferencesPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

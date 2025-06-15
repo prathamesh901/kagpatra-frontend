@@ -1,22 +1,44 @@
 
 import { useRef, useState } from "react";
+// Only allowed Lucide icons based on context
 import { ChevronLeft, Upload, FileStack, Trash } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
+import * as pdfjsLib from "pdfjs-dist";
+import "pdfjs-dist/build/pdf.worker.entry";
 
 type UploadOption = "device" | "google" | null;
+
+const ACCEPTED_FORMATS = ".pdf,.doc,.docx,.txt,.jpg,.png";
 
 const UploadDocumentPage = () => {
   const navigate = useNavigate();
   const [selected, setSelected] = useState<UploadOption>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [numPages, setNumPages] = useState<number | null>(null);
+  const [loadingPages, setLoadingPages] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // For Google Drive (future)
+  // ...
+
+  // Parse PDF to get page count
+  async function getPdfPageCount(file: File): Promise<number | null> {
+    const buffer = await file.arrayBuffer();
+    try {
+      const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+      return pdf.numPages;
+    } catch (e) {
+      return null;
+    }
+  }
 
   // Handle selection and trigger file picker for device
   const handleCardClick = (option: UploadOption) => {
     setSelected(option);
-    setUploadedFile(null); // Clear previous file
+    setUploadedFile(null);
+    setNumPages(null);
     if (option === "device" && fileInputRef.current) {
       fileInputRef.current.value = "";
       fileInputRef.current.click();
@@ -25,19 +47,33 @@ const UploadDocumentPage = () => {
   };
 
   // On file selected
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      setUploadedFile(e.target.files[0]);
-      toast({
-        title: "File selected",
-        description: `Selected: ${e.target.files[0].name}`
-      });
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadedFile(file);
+    setNumPages(null);
+    setLoadingPages(true);
+
+    if (file.type === "application/pdf" || file.name.endsWith(".pdf")) {
+      // Try to count pdf pages
+      const pages = await getPdfPageCount(file) ?? 1;
+      setNumPages(pages);
+    } else {
+      // Default to 1 page for non-pdfs
+      setNumPages(1);
     }
+    setLoadingPages(false);
+
+    toast({
+      title: "File selected",
+      description: `Selected: ${file.name}`,
+    });
   };
 
   // Handler to remove file
   const handleDeleteFile = () => {
     setUploadedFile(null);
+    setNumPages(null);
     toast({
       title: "Removed",
       description: "The uploaded file has been removed",
@@ -47,26 +83,27 @@ const UploadDocumentPage = () => {
   // Handle Continue logic
   const handleContinue = () => {
     if (selected === "device") {
-      if (uploadedFile) {
-        toast({
-          title: "Success!",
-          description: `File "${uploadedFile.name}" is ready for printing.`,
+      if (uploadedFile && numPages != null) {
+        // Send file info to SetPrintPreferencesPage
+        navigate("/set-print-preferences", {
+          state: {
+            uploadedFileName: uploadedFile.name,
+            numPages: numPages,
+          },
         });
-        // Navigate or process as needed (placeholder: remain on page)
       } else {
         toast({
           title: "No file selected",
           description: "Please select a document from your device first.",
-          variant: "destructive"
+          variant: "destructive",
         });
       }
     } else if (selected === "google") {
       toast({
         title: "Google Drive integration coming soon!",
         description: "This feature isn't available yet.",
-        variant: "default"
+        variant: "default",
       });
-      // Placeholder for Google Drive logic.
     }
   };
 
@@ -82,9 +119,22 @@ const UploadDocumentPage = () => {
         </h1>
       </div>
       {/* Subtext */}
-      <p className="text-gray-400 text-base px-4 pb-0 text-center mb-5">
+      <p className="text-gray-400 text-base px-4 pb-0 text-center mb-2">
         Choose a source to upload your document for printing.
       </p>
+      {/* File info above cards if available */}
+      {(uploadedFile && (selected === "device")) && (
+        <div className="w-full flex flex-col items-center mb-2">
+          <span className="text-base font-semibold text-black">{uploadedFile.name}</span>
+          <span className="text-xs text-gray-400">
+            {loadingPages
+              ? "Detecting pages..."
+              : numPages != null
+                ? `${numPages} page${numPages !== 1 ? "s" : ""}`
+                : null}
+          </span>
+        </div>
+      )}
 
       {/* Upload options */}
       <div className="flex flex-col gap-4 px-5 mt-2 mb-6">
@@ -105,18 +155,13 @@ const UploadDocumentPage = () => {
             <span className="font-semibold text-base text-black">Upload from Device</span>
             <span className="text-gray-400 text-sm mt-0.5 text-left">
               Select a document directly from your phone or tablet.
-              {uploadedFile && selected === "device" && (
-                <span className="ml-1 text-blue-500 font-medium">
-                  {uploadedFile.name}
-                </span>
-              )}
             </span>
           </div>
           {/* Hidden file input */}
           <input
             ref={fileInputRef}
             type="file"
-            accept=".pdf,.doc,.docx,.txt,.jpg,.png"
+            accept={ACCEPTED_FORMATS}
             className="hidden"
             onChange={handleFileChange}
             tabIndex={-1}
@@ -143,7 +188,7 @@ const UploadDocumentPage = () => {
           </div>
         </button>
       </div>
-      {/* Uploaded file display */}
+      {/* Uploaded file display (below cards, for delete option) */}
       {selected === "device" && uploadedFile && (
         <div className="flex items-center justify-between bg-gray-50 border border-gray-200 w-[90%] max-w-md mx-auto rounded-xl px-4 py-3 mb-4 text-black">
           <div>
@@ -165,7 +210,7 @@ const UploadDocumentPage = () => {
         <Button
           className="w-[90%] max-w-md mx-auto h-12 rounded-full bg-blue-600 text-white font-medium text-lg pointer-events-auto shadow-lg"
           onClick={handleContinue}
-          disabled={!selected}
+          disabled={!selected || (selected === "device" && (!uploadedFile || !numPages))}
         >
           Continue
         </Button>
@@ -173,4 +218,5 @@ const UploadDocumentPage = () => {
     </div>
   );
 };
+
 export default UploadDocumentPage;
