@@ -118,8 +118,8 @@ const PaymentPage = () => {
           className="w-[90%] max-w-md mx-auto h-12 rounded-full bg-blue-600 text-white font-medium text-lg pointer-events-auto shadow-lg"
           style={{ fontFamily: "inherit" }}
           onClick={() => {
-            // For demo purposes, show a fake payment success.
-            alert("Payment processing not implemented. This is a demo page.");
+            // Redirect to printing in progress page
+            window.location.href = "/printing";
           }}
         >
           <Check className="mr-2" />Pay Now
