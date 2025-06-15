@@ -118,8 +118,8 @@ const PaymentPage = () => {
           className="w-[90%] max-w-md mx-auto h-12 rounded-full bg-blue-600 text-white font-medium text-lg pointer-events-auto shadow-lg"
           style={{ fontFamily: "inherit" }}
           onClick={() => {
-            // Redirect to printing in progress page
-            window.location.href = "/printing";
+            // Redirect to printing in progress page (now using client-side navigation)
+            navigate("/printing");
           }}
         >
           <Check className="mr-2" />Pay Now
