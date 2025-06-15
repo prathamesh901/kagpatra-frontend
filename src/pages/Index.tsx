@@ -62,6 +62,7 @@ const Index = () => {
             icon={<Printer size={27} strokeWidth={2.3} />}
             title="Find Nearby Kiosk"
             description="Locate available printing kiosks."
+            onClick={() => navigate("/kiosks")}
           />
         </div>
         {/* Recent Print Jobs */}
