@@ -5,12 +5,11 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import * as pdfjsLib from "pdfjs-dist";
 
-// Manually import worker as an ES module worker (Vite will handle this!)
-// @ts-ignore
-import pdfWorker from "pdfjs-dist/build/pdf.worker.js?worker";
-
-// Set the worker source ONCE
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
+// Remove manual worker import and set, let pdfjs use its built-in worker (Vite will inline it)
+// (Remove the following two lines:)
+// // @ts-ignore
+// import pdfWorker from "pdfjs-dist/build/pdf.worker.js?worker";
+// pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 
 type UploadOption = "device" | "google" | null;
 
