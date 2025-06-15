@@ -3,7 +3,7 @@ import { Home, DollarSign, User, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const TABS = [
-  { label: "Home", icon: Home, route: "/" },
+  { label: "Home", icon: Home, route: "/home" }, // changed from "/" to "/home"
   { label: "Estimate", icon: DollarSign, route: "/estimate" },
   { label: "Profile", icon: User, route: "/profile" },
   { label: "Nearby Kiosks", icon: MapPin, route: "/kiosks" }
