@@ -1,13 +1,31 @@
+
 import { useRef, useState } from "react";
-// Only allowed Lucide icons based on context
 import { ChevronLeft, Upload, FileStack, Trash } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import * as pdfjsLib from "pdfjs-dist";
 
-// Set up PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+// PDF.js worker setup (try CDN, then fallback to local)
+const setupPdfWorker = () => {
+  const CDN = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+  const LOCAL = '/pdf.worker.js';
+
+  // Try to use CDN worker first
+  try {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = CDN;
+    // We'll verify the worker loads later via parsing
+  } catch (e) {
+    // If it fails (rare), try local fallback
+    try {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = LOCAL;
+      // Could add a fetch to test LOCAL, but PDF.js will error if it fails
+    } catch (err) {
+      // Silent: pdf parsing will fail and show error toast
+    }
+  }
+};
+setupPdfWorker();
 
 type UploadOption = "device" | "google" | null;
 
@@ -19,18 +37,27 @@ const UploadDocumentPage = () => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [numPages, setNumPages] = useState<number | null>(null);
   const [loadingPages, setLoadingPages] = useState(false);
+  const [pdfError, setPdfError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // For Google Drive (future)
-  // ...
+  // Helper: robust PDF file detection
+  const isPdf = (file: File) => {
+    return (
+      file.type === "application/pdf" ||
+      file.name.toLowerCase().endsWith(".pdf")
+    );
+  };
 
-  // Parse PDF to get page count
+  // Parse PDF to get page count with enhanced error logging
   async function getPdfPageCount(file: File): Promise<number | null> {
     const buffer = await file.arrayBuffer();
     try {
       const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
       return pdf.numPages;
-    } catch (e) {
+    } catch (e: any) {
+      // Log error for debugging
+      console.error("PDF.js failed to parse PDF:", e?.message ?? e);
+      setPdfError("Could not read PDF: " + (e?.message || "Unknown error"));
       return null;
     }
   }
@@ -40,6 +67,7 @@ const UploadDocumentPage = () => {
     setSelected(option);
     setUploadedFile(null);
     setNumPages(null);
+    setPdfError(null);
     if (option === "device" && fileInputRef.current) {
       fileInputRef.current.value = "";
       fileInputRef.current.click();
@@ -53,28 +81,43 @@ const UploadDocumentPage = () => {
     if (!file) return;
     setUploadedFile(file);
     setNumPages(null);
+    setPdfError(null);
     setLoadingPages(true);
 
-    if (file.type === "application/pdf" || file.name.endsWith(".pdf")) {
+    if (isPdf(file)) {
       // Try to count pdf pages
-      const pages = await getPdfPageCount(file) ?? 1;
-      setNumPages(pages);
+      const pages = await getPdfPageCount(file);
+      setNumPages(pages ?? null);
+      setLoadingPages(false);
+
+      if (pages) {
+        toast({
+          title: "File selected",
+          description: `Selected: ${file.name} (${pages} page${pages > 1 ? "s" : ""})`,
+        });
+      } else {
+        toast({
+          title: "Could not read PDF",
+          description: "PDF parsing failed. Please try another file.",
+          variant: "destructive",
+        });
+      }
     } else {
       // Default to 1 page for non-pdfs
       setNumPages(1);
+      setLoadingPages(false);
+      toast({
+        title: "File selected",
+        description: `Selected: ${file.name}`,
+      });
     }
-    setLoadingPages(false);
-
-    toast({
-      title: "File selected",
-      description: `Selected: ${file.name}`,
-    });
   };
 
   // Handler to remove file
   const handleDeleteFile = () => {
     setUploadedFile(null);
     setNumPages(null);
+    setPdfError(null);
     toast({
       title: "Removed",
       description: "The uploaded file has been removed",
@@ -84,13 +127,19 @@ const UploadDocumentPage = () => {
   // Handle Continue logic
   const handleContinue = () => {
     if (selected === "device") {
-      if (uploadedFile && numPages != null) {
+      if (uploadedFile && numPages != null && !pdfError) {
         // Send file info to SetPrintPreferencesPage
         navigate("/set-print-preferences", {
           state: {
             uploadedFileName: uploadedFile.name,
             numPages: numPages,
           },
+        });
+      } else if (pdfError) {
+        toast({
+          title: "PDF parsing error",
+          description: pdfError,
+          variant: "destructive",
         });
       } else {
         toast({
@@ -132,8 +181,17 @@ const UploadDocumentPage = () => {
               ? "Detecting pages..."
               : numPages != null
                 ? `${numPages} page${numPages !== 1 ? "s" : ""}`
+                : pdfError
+                ? pdfError
                 : null}
           </span>
+        </div>
+      )}
+
+      {/* Error debug log output for devs (remove for prod) */}
+      {pdfError && (
+        <div className="text-xs text-red-500 text-center mb-2">
+          <strong>PDF error:</strong> {pdfError}
         </div>
       )}
 
@@ -211,7 +269,7 @@ const UploadDocumentPage = () => {
         <Button
           className="w-[90%] max-w-md mx-auto h-12 rounded-full bg-blue-600 text-white font-medium text-lg pointer-events-auto shadow-lg"
           onClick={handleContinue}
-          disabled={!selected || (selected === "device" && (!uploadedFile || !numPages))}
+          disabled={!selected || (selected === "device" && (!uploadedFile || !numPages || !!pdfError))}
         >
           Continue
         </Button>
@@ -221,3 +279,4 @@ const UploadDocumentPage = () => {
 };
 
 export default UploadDocumentPage;
+
