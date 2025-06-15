@@ -4,6 +4,14 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import PrintJobCard from "@/components/PrintJobCard";
 import TabBar from "@/components/TabBar";
 
+// Match status types as required
+type PrintJob = {
+  filename: string;
+  datetime: string;
+  status: "Completed" | "Pending";
+  receiptUrl?: string;
+};
+
 const user = {
   name: "Jane Doe",
   email: "janedoe@example.com",
@@ -11,7 +19,8 @@ const user = {
     "https://randomuser.me/api/portraits/women/44.jpg"
 };
 
-const printJobs = [
+// Explicitly annotate as PrintJob[]
+const printJobs: PrintJob[] = [
   {
     filename: "Project Proposal.pdf",
     datetime: "2025-06-15 10:30 AM",
