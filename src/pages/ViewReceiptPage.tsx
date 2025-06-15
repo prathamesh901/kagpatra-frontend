@@ -1,13 +1,15 @@
 
-import React from "react";
+import React, { useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Download } from "lucide-react";
+import html2pdf from "html2pdf.js";
 
 const ViewReceiptPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const receiptRef = useRef<HTMLDivElement>(null);
 
-  // Job details fallback (in real app, replace/mock as needed)
+  // Job details fallback
   const {
     filename = "Project Proposal.pdf",
     datetime = "2025-06-15 10:30 AM",
@@ -22,14 +24,28 @@ const ViewReceiptPage = () => {
     printTime?: string;
   };
 
-  // Print the page (user can "Save as PDF")
+  // Export receipt as PDF
   const handleDownload = () => {
-    window.print();
+    if (receiptRef.current) {
+      html2pdf()
+        .from(receiptRef.current)
+        .set({
+          margin:       0.3,
+          filename:     `${filename}-receipt.pdf`,
+          html2canvas:  { scale: 2, useCORS: true },
+          jsPDF:        { unit: "in", format: "a4", orientation: "portrait" },
+          pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+        })
+        .save();
+    }
   };
 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center py-10 px-2 print:px-0">
-      <div className="max-w-md w-full bg-white border border-gray-300 rounded-2xl shadow-sm px-6 py-7 print:shadow-none print:border print:rounded-none print:max-w-full">
+      <div
+        ref={receiptRef}
+        className="max-w-md w-full bg-white border border-gray-300 rounded-2xl shadow-sm px-6 py-7 print:shadow-none print:border print:rounded-none print:max-w-full"
+      >
         <h1 className="text-2xl font-bold text-center mb-6">Print Receipt</h1>
         <div className="space-y-4 text-base text-gray-700">
           <div>
@@ -61,21 +77,21 @@ const ViewReceiptPage = () => {
             <span className="font-medium">₹{Number(totalPaid).toFixed(2)}</span>
           </div>
         </div>
-        <div className="flex flex-col sm:flex-row gap-3 mt-8 print:hidden">
-          <button
-            className="flex items-center justify-center w-full gap-2 rounded-full bg-[#2853de] hover:bg-[#4664ea] text-white text-lg font-medium px-6 py-3 shadow transition"
-            onClick={handleDownload}
-          >
-            <Download size={22} /> Download Receipt
-          </button>
-          <button
-            className="w-full rounded-full border border-[#2853de] bg-gray-100 hover:bg-gray-200 text-[#2853de] text-lg font-medium px-6 py-3"
-            onClick={() => navigate("/home")}
-            type="button"
-          >
-            Back to Home
-          </button>
-        </div>
+      </div>
+      <div className="flex flex-col sm:flex-row gap-3 mt-8 print:hidden">
+        <button
+          className="flex items-center justify-center w-full gap-2 rounded-full bg-[#2853de] hover:bg-[#4664ea] text-white text-lg font-medium px-6 py-3 shadow transition"
+          onClick={handleDownload}
+        >
+          <Download size={22} /> Download Receipt
+        </button>
+        <button
+          className="w-full rounded-full border border-[#2853de] bg-gray-100 hover:bg-gray-200 text-[#2853de] text-lg font-medium px-6 py-3"
+          onClick={() => navigate("/home")}
+          type="button"
+        >
+          Back to Home
+        </button>
       </div>
     </div>
   );
