@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -118,8 +117,14 @@ const PaymentPage = () => {
           className="w-[90%] max-w-md mx-auto h-12 rounded-full bg-blue-600 text-white font-medium text-lg pointer-events-auto shadow-lg"
           style={{ fontFamily: "inherit" }}
           onClick={() => {
-            // Redirect to printing in progress page (now using client-side navigation)
-            navigate("/printing");
+            // Redirect to printing in progress page with all state information
+            navigate("/printing", {
+              state: {
+                uploadedFileName,
+                numPages,
+                estimatedCost,
+              },
+            });
           }}
         >
           <Check className="mr-2" />Pay Now

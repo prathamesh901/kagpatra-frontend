@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Printer, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -32,6 +32,16 @@ const stepInfo = [
 
 const PrintingInProgressPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const {
+    uploadedFileName,
+    numPages,
+    estimatedCost
+  } = (location.state || {}) as {
+    uploadedFileName?: string;
+    numPages?: number;
+    estimatedCost?: number;
+  };
   const [step, setStep] = React.useState(0);
 
   // Automatically advance steps and finally redirect to confirmation page
@@ -47,16 +57,15 @@ const PrintingInProgressPage = () => {
       const timer = setTimeout(() => {
         navigate("/print-confirmation", {
           state: {
-            // You can pass print details here if you want
-            uploadedFileName: "Resume.pdf",
-            totalPaid: 16,
-            printTime: "2 mins ago",
+            uploadedFileName,
+            totalPaid: estimatedCost,
+            printTime: "—", // Placeholder, will implement later
           }
         });
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, [step, navigate]);
+  }, [step, navigate, uploadedFileName, estimatedCost]);
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
