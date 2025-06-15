@@ -1,8 +1,10 @@
 
 import React, { useState } from "react";
-import { Map, List } from "lucide-react";
+import { Map, List, ChevronLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import TabBar from "@/components/TabBar";
+import KioskMapCard from "@/components/KioskMapCard";
 
 // Dummy data for list view
 const kiosks = [
@@ -13,54 +15,64 @@ const kiosks = [
 
 const NearbyKiosksPage = () => {
   const [view, setView] = useState<"map" | "list">("map");
+  const navigate = useNavigate();
+
+  const handleNavigateWithMaps = () => {
+    // Implement navigation logic here, e.g., open Google Maps with kiosk coordinates
+    window.open("https://www.google.com/maps", "_blank");
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      {/* Header and Toggle */}
-      <div className="flex flex-col items-center w-full pt-7 px-4 pb-4">
-        <div className="flex items-center w-full mb-2">
-          <h1 className="text-xl font-bold flex-1 text-center text-black" style={{ letterSpacing: -0.5 }}>
+      {/* Header */}
+      <div className="relative flex flex-col items-center w-full pt-6 px-3 pb-3">
+        <div className="flex items-center w-full mb-0.5">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="absolute left-2 flex items-center p-1 rounded-full hover:bg-gray-100 transition"
+            aria-label="Go back"
+          >
+            <ChevronLeft size={26} className="text-gray-600" />
+          </button>
+          <h1 className="flex-1 text-xl font-bold text-center text-black" style={{ letterSpacing: -0.5 }}>
             Find Nearby Kiosks
           </h1>
         </div>
         {/* Toggle */}
-        <div className="flex justify-center w-full">
-          <div className="bg-gray-100 rounded-full flex space-x-1 p-1 shadow-sm w-52">
+        <div className="flex justify-center w-full mt-3">
+          <div className="bg-gray-100 rounded-full flex flex-row p-1 gap-2 shadow w-fit mx-auto">
             <Button
               type="button"
               variant={view === "map" ? "default" : "ghost"}
-              className={`flex-1 rounded-full px-3 py-1 font-semibold text-base transition ${view === "map" ? "bg-blue-600 text-white shadow" : "text-gray-400"} `}
+              className={`flex items-center gap-2 rounded-full px-4 py-1.5 font-semibold text-base transition ${
+                view === "map" ? "bg-blue-600 text-white shadow" : "text-gray-400 bg-transparent"
+              }`}
               onClick={() => setView("map")}
             >
-              <Map size={18} className="mr-2" />
+              <Map size={20} className="mr-1" />
               Map View
             </Button>
             <Button
               type="button"
               variant={view === "list" ? "default" : "ghost"}
-              className={`flex-1 rounded-full px-3 py-1 font-semibold text-base transition ${view === "list" ? "bg-blue-600 text-white shadow" : "text-gray-400"}`}
+              className={`flex items-center gap-2 rounded-full px-4 py-1.5 font-semibold text-base transition ${
+                view === "list" ? "bg-blue-600 text-white shadow" : "text-gray-400 bg-transparent"
+              }`}
               onClick={() => setView("list")}
             >
-              <List size={18} className="mr-2" />
+              <List size={20} className="mr-1" />
               List View
             </Button>
           </div>
         </div>
       </div>
       {/* Content */}
-      <div className="flex-1 w-full max-w-md mx-auto px-4 pb-7">
+      <div className="flex-1 w-full max-w-md mx-auto px-4 pb-7 pt-4">
         {view === "map" ? (
-          <div className="rounded-2xl border border-gray-200 bg-white px-4 py-6 flex flex-col items-center justify-center shadow-sm min-h-[320px]">
-            <div className="w-full h-48 bg-blue-50 border border-blue-100 rounded-xl flex items-center justify-center text-blue-400">
-              {/* Placeholder for map */}
-              <Map size={56} strokeWidth={1.7} className="mb-2" />
-            </div>
-            <div className="mt-4 text-gray-500 text-center">
-              Map view coming soon! Here you'll see kiosks on a map.
-            </div>
-          </div>
+          <KioskMapCard onNavigate={handleNavigateWithMaps} />
         ) : (
-          <div className="rounded-2xl border border-gray-200 bg-white shadow-sm divide-y divide-gray-100">
+          <div className="rounded-2xl border border-gray-200 bg-white shadow-sm divide-y divide-gray-100 mt-2">
             {kiosks.map((kiosk, idx) => (
               <div key={idx} className="px-5 py-4 flex flex-col">
                 <span className="font-semibold text-base text-black mb-0.5">{kiosk.name}</span>
@@ -78,5 +90,4 @@ const NearbyKiosksPage = () => {
     </div>
   );
 };
-
 export default NearbyKiosksPage;
