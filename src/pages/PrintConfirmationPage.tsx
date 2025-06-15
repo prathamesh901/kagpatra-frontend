@@ -80,7 +80,7 @@ const PrintConfirmationPage = () => {
         <button
           type="button"
           className="block w-full max-w-md mx-auto mt-4 rounded-full bg-gray-100 hover:bg-gray-200 text-[#2853de] border border-[#2853de] text-lg font-medium px-6 py-4 shadow-none transition"
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/home")}
         >
           Go Home
         </button>
@@ -90,4 +90,3 @@ const PrintConfirmationPage = () => {
 };
 
 export default PrintConfirmationPage;
-
