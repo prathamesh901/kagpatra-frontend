@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,7 @@ const slides = [
     description: "Scan the QR code on any Kagpatra kiosk using our app to start your print session.",
   },
   {
-    img: "/lovable-uploads/5e40d423-e861-430b-9a89-21834be40351.png",
+    img: "/lovable-uploads/ea5c2c4c-603e-45b8-9b56-b584821d70f8.png?v=" + Date.now(),
     title: "Upload from Anywhere",
     description: "Upload documents from your phone, Google Drive, or scan a QR from another device.",
   },
