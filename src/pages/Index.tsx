@@ -40,7 +40,12 @@ const Index = () => {
           Welcome back to Kagpatra. Ready to print?
         </p>
         {/* Start Printing Card */}
-        <div className="rounded-2xl border border-gray-200 bg-white px-5 py-7 flex flex-col items-center justify-center mb-6 shadow-sm">
+        <div
+          className="rounded-2xl border border-gray-200 bg-white px-5 py-7 flex flex-col items-center justify-center mb-6 shadow-sm cursor-pointer hover:shadow-md transition"
+          onClick={() => navigate("/scan")}
+          tabIndex={0}
+          role="button"
+        >
           <div className="flex justify-center items-center mb-2">
             <svg width={36} height={36} viewBox="0 0 36 36" fill="none">
               <rect x={7} y={7} width={22} height={22} rx={4} stroke="#4581F4" strokeWidth={2} strokeDasharray="3 3" />

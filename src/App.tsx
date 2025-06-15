@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,6 +9,8 @@ import NotFound from "./pages/NotFound";
 import EstimateCostPage from "./pages/EstimateCostPage";
 import NearbyKiosksPage from "./pages/NearbyKiosksPage";
 import ProfilePage from "./pages/ProfilePage";
+import ScanQRCodePage from "./pages/ScanQRCodePage";
+import UploadDocumentPage from "./pages/UploadDocumentPage";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +25,8 @@ const App = () => (
           <Route path="/estimate" element={<EstimateCostPage />} />
           <Route path="/kiosks" element={<NearbyKiosksPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/scan" element={<ScanQRCodePage />} />
+          <Route path="/upload" element={<UploadDocumentPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
