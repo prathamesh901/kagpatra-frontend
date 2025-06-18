@@ -2,7 +2,6 @@
 import React, { useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Download } from "lucide-react";
-import html2pdf from "html2pdf.js";
 
 const ViewReceiptPage = () => {
   const location = useLocation();
@@ -24,19 +23,26 @@ const ViewReceiptPage = () => {
     printTime?: string;
   };
 
-  // Export receipt as PDF
-  const handleDownload = () => {
+  // Export receipt as PDF with dynamic import
+  const handleDownload = async () => {
     if (receiptRef.current) {
-      html2pdf()
-        .from(receiptRef.current)
-        .set({
-          margin:       0.3,
-          filename:     `${filename}-receipt.pdf`,
-          html2canvas:  { scale: 2, useCORS: true },
-          jsPDF:        { unit: "in", format: "a4", orientation: "portrait" },
-          pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
-        })
-        .save();
+      try {
+        const html2pdf = (await import('html2pdf.js')).default;
+        html2pdf()
+          .from(receiptRef.current)
+          .set({
+            margin: 0.3,
+            filename: `${filename}-receipt.pdf`,
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
+            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+          })
+          .save();
+      } catch (error) {
+        console.error('Error generating PDF:', error);
+        // Fallback to browser print dialog
+        window.print();
+      }
     }
   };
 

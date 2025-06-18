@@ -1,5 +1,6 @@
+
 import { useRef, useState } from "react";
-import { ChevronLeft, Upload, FileStack, Trash } from "lucide-react";
+import { ChevronLeft, Upload, FileStack, Trash, Shield } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
@@ -88,6 +89,20 @@ const UploadDocumentPage = () => {
       <p className="text-gray-400 text-base px-4 pb-0 text-center mb-2">
         Choose a source to upload your document for printing.
       </p>
+
+      {/* Privacy Notice */}
+      <div className="mx-4 mb-4 mt-2 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
+        <div className="flex items-start gap-3">
+          <Shield size={20} className="text-green-600 mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="text-green-800 font-medium text-sm mb-1">🔒 Your Privacy is Protected</p>
+            <p className="text-green-700 text-xs leading-relaxed">
+              Your document will be automatically deleted from our servers immediately after printing for your security and privacy. We never store your files permanently.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Upload options */}
       <div className="flex flex-col gap-4 px-5 mt-2 mb-6">
         {/* Upload from Device */}

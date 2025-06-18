@@ -1,7 +1,7 @@
 
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Check } from "lucide-react";
+import { Check, Trash2 } from "lucide-react";
 
 const PrintConfirmationPage = () => {
   const navigate = useNavigate();
@@ -29,6 +29,19 @@ const PrintConfirmationPage = () => {
         <h2 className="text-2xl sm:text-3xl font-bold text-center mt-7 mb-7 text-black">
           Your Document is Ready!
         </h2>
+
+        {/* Privacy Confirmation */}
+        <div className="mx-auto w-[90vw] max-w-sm rounded-2xl bg-green-50 border border-green-200 px-4 py-3 mb-4">
+          <div className="flex items-center gap-3">
+            <Trash2 size={20} className="text-green-600" />
+            <div>
+              <p className="text-green-800 font-medium text-sm">✓ Document Securely Deleted</p>
+              <p className="text-green-700 text-xs mt-0.5">
+                Your file has been automatically removed from our servers for your privacy.
+              </p>
+            </div>
+          </div>
+        </div>
 
         {/* Print Details Box */}
         <div className="mx-auto w-[90vw] max-w-sm rounded-2xl border border-gray-300 bg-white px-6 py-5 shadow-sm">
