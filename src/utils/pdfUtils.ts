@@ -1,27 +1,19 @@
 
-import * as pdfjsLib from 'pdfjs-dist';
+import * as pdfjsLib from 'pdfjs-dist/build/pdf';
+import pdfWorker from 'pdfjs-dist/build/pdf.worker.entry';
 
-// Set up the worker for PDF.js
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
+// Set up worker source
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 
 export const countPdfPages = async (file: File): Promise<number> => {
   try {
-    // Only process PDF files
-    if (file.type !== 'application/pdf') {
-      return 1; // Default to 1 page for non-PDF files
-    }
+    if (file.type !== 'application/pdf') return 1;
 
-    // Convert file to ArrayBuffer
     const arrayBuffer = await file.arrayBuffer();
-    
-    // Load the PDF document
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-    
-    // Return the number of pages
     return pdf.numPages;
   } catch (error) {
     console.error('Error counting PDF pages:', error);
-    // Fallback to 1 page if counting fails
     return 1;
   }
 };
