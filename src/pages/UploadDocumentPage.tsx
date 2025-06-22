@@ -1,9 +1,10 @@
 
 import { useRef, useState } from "react";
-import { ChevronLeft, Upload, FileStack, Trash, Shield } from "lucide-react";
+import { ChevronLeft, Upload, FileStack, Trash, Shield, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
+import { countPdfPages, getFileTypeDisplayName } from "@/utils/pdfUtils";
 
 type UploadOption = "device" | "google" | null;
 
@@ -13,12 +14,15 @@ const UploadDocumentPage = () => {
   const navigate = useNavigate();
   const [selected, setSelected] = useState<UploadOption>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [numPages, setNumPages] = useState<number>(1);
+  const [isProcessing, setIsProcessing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Handle selection and trigger file picker for device
   const handleCardClick = (option: UploadOption) => {
     setSelected(option);
     setUploadedFile(null);
+    setNumPages(1);
     if (option === "device" && fileInputRef.current) {
       fileInputRef.current.value = "";
       fileInputRef.current.click();
@@ -26,21 +30,40 @@ const UploadDocumentPage = () => {
     // For Google, do nothing on click (show toast on Continue)
   };
 
-  // On file selected: set uploaded file and always set to 1 page
+  // On file selected: count pages and set uploaded file
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    
     setUploadedFile(file);
+    setIsProcessing(true);
 
-    toast({
-      title: "File selected",
-      description: `Selected: ${file.name} (1 page)`,
-    });
+    try {
+      const pageCount = await countPdfPages(file);
+      setNumPages(pageCount);
+      
+      const fileTypeDisplay = getFileTypeDisplayName(file);
+      
+      toast({
+        title: "File selected",
+        description: `Selected: ${file.name} (${fileTypeDisplay}${pageCount > 1 ? `, ${pageCount} pages` : ''})`,
+      });
+    } catch (error) {
+      console.error('Error processing file:', error);
+      setNumPages(1);
+      toast({
+        title: "File selected",
+        description: `Selected: ${file.name} (1 page)`,
+      });
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   // Handler to remove file
   const handleDeleteFile = () => {
     setUploadedFile(null);
+    setNumPages(1);
     toast({
       title: "Removed",
       description: "The uploaded file has been removed",
@@ -50,13 +73,19 @@ const UploadDocumentPage = () => {
   // Handle Continue logic
   const handleContinue = () => {
     if (selected === "device") {
-      if (uploadedFile) {
+      if (uploadedFile && !isProcessing) {
         // Send file info to SetPrintPreferencesPage
         navigate("/set-print-preferences", {
           state: {
             uploadedFileName: uploadedFile.name,
-            numPages: 1,
+            numPages: numPages,
           },
+        });
+      } else if (isProcessing) {
+        toast({
+          title: "Please wait",
+          description: "Still analyzing your document...",
+          variant: "default",
         });
       } else {
         toast({
@@ -85,7 +114,6 @@ const UploadDocumentPage = () => {
           Upload Your Document
         </h1>
       </div>
-      {/* Subtext */}
       <p className="text-gray-400 text-base px-4 pb-0 text-center mb-2">
         Choose a source to upload your document for printing.
       </p>
@@ -105,7 +133,6 @@ const UploadDocumentPage = () => {
 
       {/* Upload options */}
       <div className="flex flex-col gap-4 px-5 mt-2 mb-6">
-        {/* Upload from Device */}
         <button
           className={`flex items-center w-full border rounded-2xl bg-white px-5 py-4 shadow-sm transition focus:outline-none ${
             selected === "device"
@@ -124,7 +151,6 @@ const UploadDocumentPage = () => {
               Select a document directly from your phone or tablet.
             </span>
           </div>
-          {/* Hidden file input */}
           <input
             ref={fileInputRef}
             type="file"
@@ -134,7 +160,6 @@ const UploadDocumentPage = () => {
             tabIndex={-1}
           />
         </button>
-        {/* Import from Google Drive */}
         <button
           className={`flex items-center w-full border rounded-2xl bg-white px-5 py-4 shadow-sm transition focus:outline-none ${
             selected === "google"
@@ -155,12 +180,24 @@ const UploadDocumentPage = () => {
           </div>
         </button>
       </div>
-      {/* Uploaded file display (below cards, for delete option) */}
-      {selected === "device" && uploadedFile && (
+
+      {/* Processing indicator */}
+      {isProcessing && (
+        <div className="flex items-center justify-center bg-blue-50 border border-blue-200 w-[90%] max-w-md mx-auto rounded-xl px-4 py-3 mb-4">
+          <Loader2 size={20} className="animate-spin text-blue-600 mr-3" />
+          <span className="text-blue-800 font-medium">Analyzing document...</span>
+        </div>
+      )}
+
+      {/* Uploaded file display */}
+      {selected === "device" && uploadedFile && !isProcessing && (
         <div className="flex items-center justify-between bg-gray-50 border border-gray-200 w-[90%] max-w-md mx-auto rounded-xl px-4 py-3 mb-4 text-black">
           <div>
             <span className="block font-medium text-sm mb-1 text-gray-500">Your uploaded file</span>
             <span className="text-base font-semibold">{uploadedFile.name}</span>
+            <span className="block text-xs text-gray-400 mt-0.5">
+              {numPages} page{numPages !== 1 ? 's' : ''} • {getFileTypeDisplayName(uploadedFile)}
+            </span>
           </div>
           <button
             type="button"
@@ -172,14 +209,15 @@ const UploadDocumentPage = () => {
           </button>
         </div>
       )}
+
       {/* Bottom button */}
       <div className="fixed bottom-5 left-0 w-full flex justify-center pointer-events-none z-10">
         <Button
           className="w-[90%] max-w-md mx-auto h-12 rounded-full bg-blue-600 text-white font-medium text-lg pointer-events-auto shadow-lg"
           onClick={handleContinue}
-          disabled={!selected || (selected === "device" && (!uploadedFile))}
+          disabled={!selected || (selected === "device" && (!uploadedFile || isProcessing))}
         >
-          Continue
+          {isProcessing ? "Processing..." : "Continue"}
         </Button>
       </div>
     </div>
