@@ -1,10 +1,14 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { FileText } from "lucide-react";
 import TabBar from "@/components/TabBar";
+
+type PageSelection = "all" | "odd" | "even" | "custom";
 
 // Updated cost logic: b/w = ₹5, color = ₹10, double-sided doubles the cost
 function getEstimatedCost({
@@ -12,15 +16,24 @@ function getEstimatedCost({
   color,
   copies,
   doubleSided,
+  pageSelection,
 }: {
   pages: number;
   color: "bw" | "color";
   copies: number;
   doubleSided: boolean;
+  pageSelection: PageSelection;
 }) {
   let base = color === "color" ? 10 : 5;
   let sidesAdj = doubleSided ? 2 : 1;
-  return Math.round(base * pages * copies * sidesAdj * 100) / 100;
+  
+  // Adjust pages based on selection
+  let effectivePages = pages;
+  if (pageSelection === "odd" || pageSelection === "even") {
+    effectivePages = Math.ceil(pages / 2); // Half the pages for odd/even
+  }
+  
+  return Math.round(base * effectivePages * copies * sidesAdj * 100) / 100;
 }
 
 const minPages = 1;
@@ -35,11 +48,12 @@ const EstimateCostPage = () => {
   const [color, setColor] = useState<"bw" | "color">("bw");
   const [copies, setCopies] = useState(1);
   const [doubleSided, setDoubleSided] = useState(false);
+  const [pageSelection, setPageSelection] = useState<PageSelection>("all");
   const [showEstimate, setShowEstimate] = useState(false);
   const [cost, setCost] = useState<number | null>(null);
 
   const handleCalculate = () => {
-    const estimated = getEstimatedCost({ pages, color, copies, doubleSided });
+    const estimated = getEstimatedCost({ pages, color, copies, doubleSided, pageSelection });
     setCost(estimated);
     setShowEstimate(true);
   };
@@ -49,6 +63,7 @@ const EstimateCostPage = () => {
     setColor("bw");
     setCopies(1);
     setDoubleSided(false);
+    setPageSelection("all");
     setShowEstimate(false);
     setCost(null);
   };
@@ -121,6 +136,21 @@ const EstimateCostPage = () => {
                 Color
               </button>
             </div>
+          </div>
+          {/* Pages selection */}
+          <div className="flex items-center justify-between px-5 py-5">
+            <div className="font-medium text-base">Pages</div>
+            <Select value={pageSelection} onValueChange={(value: PageSelection) => setPageSelection(value)}>
+              <SelectTrigger className="w-40 bg-gray-100 border-none">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-white border border-gray-200 shadow-lg">
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="odd">Odd pages only</SelectItem>
+                <SelectItem value="even">Even pages only</SelectItem>
+                <SelectItem value="custom">Custom</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           {/* Copies */}
           <div className="flex items-center justify-between px-5 py-5">

@@ -1,7 +1,9 @@
+
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, Minus, Plus, FileText } from "lucide-react";
@@ -11,21 +13,31 @@ type LocationState = {
   numPages: number;
 };
 
+type PageSelection = "all" | "odd" | "even" | "custom";
+
 const getEstimatedCost = ({
   pages,
   color,
   copies,
-  doubleSided
+  doubleSided,
+  pageSelection
 }: {
   pages: number;
   color: "bw" | "color";
   copies: number;
   doubleSided: boolean;
+  pageSelection: PageSelection;
 }) => {
   let pricePerPage = color === "color" ? 10 : 5; // ₹10 for color, ₹5 for b/w
   let sidesAdj = doubleSided ? 2 : 1;
-  // Double-sided now doubles the cost if selected
-  return Math.round(pricePerPage * pages * copies * sidesAdj * 100) / 100;
+  
+  // Adjust pages based on selection
+  let effectivePages = pages;
+  if (pageSelection === "odd" || pageSelection === "even") {
+    effectivePages = Math.ceil(pages / 2); // Half the pages for odd/even
+  }
+  
+  return Math.round(pricePerPage * effectivePages * copies * sidesAdj * 100) / 100;
 };
 
 const SetPrintPreferencesPage = () => {
@@ -38,6 +50,7 @@ const SetPrintPreferencesPage = () => {
   const [copies, setCopies] = useState(1);
   const [doubleSided, setDoubleSided] = useState(false);
   const [direction, setDirection] = useState<"portrait" | "landscape">("portrait");
+  const [pageSelection, setPageSelection] = useState<PageSelection>("all");
 
   const minCopies = 1;
   const maxCopies = 100;
@@ -47,6 +60,7 @@ const SetPrintPreferencesPage = () => {
     color,
     copies,
     doubleSided,
+    pageSelection,
   });
 
   return (
@@ -101,6 +115,23 @@ const SetPrintPreferencesPage = () => {
             </button>
           </div>
         </div>
+        
+        {/* Pages selection */}
+        <div className="flex items-center justify-between rounded-2xl bg-white border border-gray-200 px-5 py-4 mb-3">
+          <div className="font-semibold text-base">Pages</div>
+          <Select value={pageSelection} onValueChange={(value: PageSelection) => setPageSelection(value)}>
+            <SelectTrigger className="w-40 bg-gray-100 border-none">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-white border border-gray-200 shadow-lg">
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="odd">Odd pages only</SelectItem>
+              <SelectItem value="even">Even pages only</SelectItem>
+              <SelectItem value="custom">Custom</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
         {/* Direction */}
         <div className="flex items-center justify-between rounded-2xl bg-white border border-gray-200 px-5 py-4 mb-3">
           <div className="font-semibold text-base">Direction</div>
