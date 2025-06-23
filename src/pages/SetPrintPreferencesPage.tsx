@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -140,7 +139,7 @@ const SetPrintPreferencesPage = () => {
                 placeholder="e.g. 1-5, 8, 11-13"
                 value={customPageRange}
                 onChange={(e) => setCustomPageRange(e.target.value)}
-                className="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                className="w-40 bg-gray-100 border-none"
               />
             </div>
           )}
