@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -51,6 +52,7 @@ const SetPrintPreferencesPage = () => {
   const [doubleSided, setDoubleSided] = useState(false);
   const [direction, setDirection] = useState<"portrait" | "landscape">("portrait");
   const [pageSelection, setPageSelection] = useState<PageSelection>("all");
+  const [customPageRange, setCustomPageRange] = useState("");
 
   const minCopies = 1;
   const maxCopies = 100;
@@ -117,19 +119,31 @@ const SetPrintPreferencesPage = () => {
         </div>
         
         {/* Pages selection */}
-        <div className="flex items-center justify-between rounded-2xl bg-white border border-gray-200 px-5 py-4 mb-3">
-          <div className="font-semibold text-base">Pages</div>
-          <Select value={pageSelection} onValueChange={(value: PageSelection) => setPageSelection(value)}>
-            <SelectTrigger className="w-40 bg-gray-100 border-none">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-white border border-gray-200 shadow-lg">
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="odd">Odd pages only</SelectItem>
-              <SelectItem value="even">Even pages only</SelectItem>
-              <SelectItem value="custom">Custom</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="rounded-2xl bg-white border border-gray-200 px-5 py-4 mb-3">
+          <div className="flex items-center justify-between mb-3">
+            <div className="font-semibold text-base">Pages</div>
+            <Select value={pageSelection} onValueChange={(value: PageSelection) => setPageSelection(value)}>
+              <SelectTrigger className="w-40 bg-gray-100 border-none">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-white border border-gray-200 shadow-lg z-50">
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="odd">Odd pages only</SelectItem>
+                <SelectItem value="even">Even pages only</SelectItem>
+                <SelectItem value="custom">Custom</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          {pageSelection === "custom" && (
+            <div className="mt-3">
+              <Input
+                placeholder="e.g. 1-5, 8, 11-13"
+                value={customPageRange}
+                onChange={(e) => setCustomPageRange(e.target.value)}
+                className="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm"
+              />
+            </div>
+          )}
         </div>
         
         {/* Direction */}
