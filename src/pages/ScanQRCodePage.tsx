@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { QrReader } from "react-qr-reader";
+import QrScanner from "react-qr-scanner";
 import { ChevronLeft } from "lucide-react";
 import { useState } from "react";
 
@@ -8,12 +8,12 @@ const ScanQRCodePage = () => {
   const [hasScanned, setHasScanned] = useState(false);
 
   // When a QR code is scanned, navigate to the URL encoded in the QR (if present), otherwise fallback to /upload
-  const handleQrResult = (result: any, error: any) => {
-    if (!!result && !hasScanned) {
+  const handleQrResult = (data: any) => {
+    if (!!data && !hasScanned) {
       setHasScanned(true);
       // If the QR code contains a URL, navigate to it
-      const text = result?.text || "";
-      if (text.startsWith("http://") || text.startsWith("https://")) {
+      const text = data.text || data || "";
+      if (typeof text === "string" && (text.startsWith("http://") || text.startsWith("https://"))) {
         window.location.href = text;
       } else {
         navigate("/upload");
@@ -42,21 +42,16 @@ const ScanQRCodePage = () => {
         <div className="w-[260px] h-[260px] rounded-[24px] border-4 border-[#4877F7] flex items-center justify-center bg-white my-4 relative overflow-hidden">
           {/* QR code scanner video */}
           {!hasScanned && (
-            <QrReader
-              constraints={{ facingMode: "environment" }}
-              onResult={handleQrResult}
-              containerStyle={{
+            <QrScanner
+              delay={300}
+              onScan={handleQrResult}
+              onError={() => {}}
+              style={{
                 width: '100%',
                 height: '100%',
                 position: 'absolute',
                 borderRadius: '24px',
                 overflow: 'hidden'
-              }}
-              videoStyle={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                borderRadius: "24px"
               }}
             />
           )}
