@@ -7,7 +7,7 @@ const slides = [
   {
     img: "/lovable-uploads/2bfe247f-f532-4f52-b7d0-801f29780844.png?v=" + Date.now(),
     title: "Scan to Begin",
-    description: "Scan the QR code on any Kagpatra kiosk using our app to start your print session.",
+    description: "Scan the QR code on any Kagpatra kiosk using our app to start printing.",
   },
   {
     img: "/lovable-uploads/ea5c2c4c-603e-45b8-9b56-b584821d70f8.png?v=" + Date.now(),

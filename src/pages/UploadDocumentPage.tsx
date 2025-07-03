@@ -1,14 +1,14 @@
-
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, Upload, FileStack, Trash, Shield, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { countPdfPages, getFileTypeDisplayName } from "@/utils/pdfUtils";
-
-type UploadOption = "device" | "google" | null;
+import { BACKEND_URL } from "@/config";
 
 const ACCEPTED_FORMATS = ".pdf,.doc,.docx,.txt,.jpg,.png";
+
+type UploadOption = "device" | "google" | null;
 
 const UploadDocumentPage = () => {
   const navigate = useNavigate();
@@ -17,6 +17,7 @@ const UploadDocumentPage = () => {
   const [numPages, setNumPages] = useState<number>(1);
   const [isProcessing, setIsProcessing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const backendFilePathRef = useRef<string | null>(null);
 
   // Handle selection and trigger file picker for device
   const handleCardClick = (option: UploadOption) => {
@@ -30,55 +31,24 @@ const UploadDocumentPage = () => {
     // For Google, do nothing on click (show toast on Continue)
   };
 
-  // On file selected: count pages and set uploaded file
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    
-    setUploadedFile(file);
-    setIsProcessing(true);
-
-    try {
-      const pageCount = await countPdfPages(file);
-      setNumPages(pageCount);
-      
-      const fileTypeDisplay = getFileTypeDisplayName(file);
-      
-      toast({
-        title: "File selected",
-        description: `Selected: ${file.name} (${fileTypeDisplay}${pageCount > 1 ? `, ${pageCount} pages` : ''})`,
-      });
-    } catch (error) {
-      console.error('Error processing file:', error);
-      setNumPages(1);
-      toast({
-        title: "File selected",
-        description: `Selected: ${file.name} (1 page)`,
-      });
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  // Handler to remove file
-  const handleDeleteFile = () => {
-    setUploadedFile(null);
-    setNumPages(1);
-    toast({
-      title: "Removed",
-      description: "The uploaded file has been removed",
-    });
-  };
-
   // Handle Continue logic
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (selected === "device") {
       if (uploadedFile && !isProcessing) {
+        if (!backendFilePathRef.current) {
+          toast({
+            title: "Upload Error",
+            description: "File upload failed. Please re-upload your document.",
+            variant: "destructive",
+          });
+          return;
+        }
         // Send file info to SetPrintPreferencesPage
         navigate("/set-print-preferences", {
           state: {
             uploadedFileName: uploadedFile.name,
             numPages: numPages,
+            backendFilePath: backendFilePathRef.current,
           },
         });
       } else if (isProcessing) {
@@ -103,11 +73,81 @@ const UploadDocumentPage = () => {
     }
   };
 
+  // On file selected: count pages and set uploaded file
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadedFile(file);
+    setIsProcessing(true);
+
+    try {
+      // Count PDF pages
+      const pageCount = await countPdfPages(file);
+      setNumPages(pageCount);
+
+      const fileTypeDisplay = getFileTypeDisplayName(file);
+
+      // Upload to backend (returns fileUrl and jobId)
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await fetch(`${BACKEND_URL}/api/upload`, {
+        method: "POST",
+        body: formData,
+      });
+      if (response.ok) {
+        const data = await response.json();
+        backendFilePathRef.current = data.fileUrl; // Use fileUrl for direct access
+        // Save jobId for later steps (preferences, pay)
+        window.sessionStorage.setItem("jobId", data.jobId);
+        console.log("Backend upload response:", data);
+      } else {
+        backendFilePathRef.current = null;
+        console.error("Upload failed or response not JSON", response);
+        toast({
+          title: "Upload failed",
+          description: "Could not upload file. Please try again.",
+          variant: "destructive",
+        });
+        setIsProcessing(false);
+        return;
+      }
+
+      toast({
+        title: "File selected",
+        description: `Selected: ${file.name} (${fileTypeDisplay}${pageCount > 1 ? `, ${pageCount} pages` : ""})`,
+      });
+    } catch (error) {
+      console.error("Error processing file:", error);
+      setNumPages(1);
+      toast({
+        title: "File selected",
+        description: `Selected: ${file.name} (1 page)`,
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Handler to remove file
+  const handleDeleteFile = () => {
+    setUploadedFile(null);
+    setNumPages(1);
+    toast({
+      title: "Removed",
+      description: "The uploaded file has been removed",
+    });
+  };
+
   return (
     <div className="min-h-screen bg-white flex flex-col px-0 pt-4 pb-4 relative">
       {/* Header */}
       <div className="flex items-center mb-2 px-4">
-        <button onClick={() => navigate(-1)} className="mr-2 p-1 rounded hover:bg-gray-100" aria-label="Back">
+        <button
+          onClick={() => navigate(-1)}
+          className="mr-2 p-1 rounded hover:bg-gray-100"
+          aria-label="Back"
+        >
           <ChevronLeft size={28} className="text-black" />
         </button>
         <h1 className="text-xl font-bold text-black flex-1 text-center pr-8">
@@ -123,9 +163,13 @@ const UploadDocumentPage = () => {
         <div className="flex items-start gap-3">
           <Shield size={20} className="text-green-600 mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-green-800 font-medium text-sm mb-1">🔒 Your Privacy is Protected</p>
+            <p className="text-green-800 font-medium text-sm mb-1">
+              🔒 Your Privacy is Protected
+            </p>
             <p className="text-green-700 text-xs leading-relaxed">
-              Your document will be automatically deleted from our servers immediately after printing for your security and privacy. We never store your files permanently.
+              Your document will be automatically deleted from our servers
+              immediately after printing for your security and privacy. We never
+              store your files permanently.
             </p>
           </div>
         </div>
@@ -146,7 +190,9 @@ const UploadDocumentPage = () => {
             <Upload size={26} className="text-blue-500" />
           </span>
           <div className="flex flex-col items-start">
-            <span className="font-semibold text-base text-black">Upload from Device</span>
+            <span className="font-semibold text-base text-black">
+              Upload from Device
+            </span>
             <span className="text-gray-400 text-sm mt-0.5 text-left">
               Select a document directly from your phone or tablet.
             </span>
@@ -173,7 +219,9 @@ const UploadDocumentPage = () => {
             <FileStack size={26} className="text-blue-500" />
           </span>
           <div className="flex flex-col items-start">
-            <span className="font-semibold text-base text-black">Import from Google Drive</span>
+            <span className="font-semibold text-base text-black">
+              Import from Google Drive
+            </span>
             <span className="text-gray-400 text-sm mt-0.5 text-left">
               Access your documents stored in Google Drive
             </span>
@@ -193,10 +241,13 @@ const UploadDocumentPage = () => {
       {selected === "device" && uploadedFile && !isProcessing && (
         <div className="flex items-center justify-between bg-gray-50 border border-gray-200 w-[90%] max-w-md mx-auto rounded-xl px-4 py-3 mb-4 text-black">
           <div>
-            <span className="block font-medium text-sm mb-1 text-gray-500">Your uploaded file</span>
+            <span className="block font-medium text-sm mb-1 text-gray-500">
+              Your uploaded file
+            </span>
             <span className="text-base font-semibold">{uploadedFile.name}</span>
             <span className="block text-xs text-gray-400 mt-0.5">
-              {numPages} page{numPages !== 1 ? 's' : ''} • {getFileTypeDisplayName(uploadedFile)}
+              {numPages} page{numPages !== 1 ? "s" : ""} •{" "}
+              {getFileTypeDisplayName(uploadedFile)}
             </span>
           </div>
           <button

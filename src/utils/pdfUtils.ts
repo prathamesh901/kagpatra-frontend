@@ -1,20 +1,20 @@
+// src/utils/pdfUtils.ts
+import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist';
+import workerUrl from 'pdfjs-dist/build/pdf.worker?url';
 
-import * as pdfjsLib from 'pdfjs-dist';
-import { getDocument } from 'pdfjs-dist';
-
-// Manually set workerSrc to CDN version (safe in Vite)
-pdfjsLib.GlobalWorkerOptions.workerSrc =
-  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+// Tell PDF.js to use the locally built worker
+GlobalWorkerOptions.workerSrc = workerUrl;
 
 export const countPdfPages = async (file: File): Promise<number> => {
   try {
-    if (file.type !== 'application/pdf') return 1;
+    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+    if (!isPdf) return 1;
 
     const arrayBuffer = await file.arrayBuffer();
     const pdf = await getDocument({ data: arrayBuffer }).promise;
     return pdf.numPages;
   } catch (error) {
-    console.error('Error counting PDF pages:', error);
+    console.error('Error counting PDF pages:', error, file);
     return 1;
   }
 };

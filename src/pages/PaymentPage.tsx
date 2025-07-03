@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { BACKEND_URL } from "@/config";
 
 type PaymentLocationState = {
   uploadedFileName?: string;
@@ -44,10 +45,43 @@ const PaymentPage = () => {
     uploadedFileName = "Document.pdf",
     numPages = 1,
     estimatedCost = 0,
-  } = (location.state || {}) as PaymentLocationState;
+    backendFilePath = "",
+    preferences = {},
+  } = (location.state || {}) as PaymentLocationState & { backendFilePath?: string; preferences?: any };
 
   // Payment method state
   const [selected, setSelected] = React.useState("upi");
+  const [isPaying, setIsPaying] = React.useState(false);
+
+  const handlePayNow = async () => {
+    setIsPaying(true);
+    try {
+      // Get jobId from sessionStorage
+      const jobId = window.sessionStorage.getItem("jobId");
+      if (!jobId) throw new Error("No jobId found");
+      // Mark job as paid (simulate payment)
+      const response = await fetch(`${BACKEND_URL}/api/pay`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jobId }),
+      });
+      if (response.ok) {
+        navigate("/printing", {
+          state: {
+            uploadedFileName,
+            numPages,
+            estimatedCost,
+          },
+        });
+      } else {
+        alert("Failed to start print job. Please try again.");
+      }
+    } catch (err) {
+      alert("Network error. Please try again.");
+    } finally {
+      setIsPaying(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -116,18 +150,10 @@ const PaymentPage = () => {
         <Button
           className="w-[90%] max-w-md mx-auto h-12 rounded-full bg-blue-600 text-white font-medium text-lg pointer-events-auto shadow-lg"
           style={{ fontFamily: "inherit" }}
-          onClick={() => {
-            // Redirect to printing in progress page with all state information
-            navigate("/printing", {
-              state: {
-                uploadedFileName,
-                numPages,
-                estimatedCost,
-              },
-            });
-          }}
+          onClick={handlePayNow}
+          disabled={isPaying}
         >
-          <Check className="mr-2" />Pay Now
+          <Check className="mr-2" />{isPaying ? "Processing..." : "Pay Now"}
         </Button>
       </div>
     </div>

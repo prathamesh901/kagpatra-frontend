@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { QrReader } from "react-qr-reader";
 import { ChevronLeft } from "lucide-react";
@@ -7,6 +6,20 @@ import { useState } from "react";
 const ScanQRCodePage = () => {
   const navigate = useNavigate();
   const [hasScanned, setHasScanned] = useState(false);
+
+  // When a QR code is scanned, navigate to the URL encoded in the QR (if present), otherwise fallback to /upload
+  const handleQrResult = (result: any, error: any) => {
+    if (!!result && !hasScanned) {
+      setHasScanned(true);
+      // If the QR code contains a URL, navigate to it
+      const text = result?.text || "";
+      if (text.startsWith("http://") || text.startsWith("https://")) {
+        window.location.href = text;
+      } else {
+        navigate("/upload");
+      }
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white flex flex-col px-0 pt-4 pb-4 relative">
@@ -31,12 +44,7 @@ const ScanQRCodePage = () => {
           {!hasScanned && (
             <QrReader
               constraints={{ facingMode: "environment" }}
-              onResult={(result, error) => {
-                if (!!result && !hasScanned) {
-                  setHasScanned(true);
-                  navigate("/upload");
-                }
-              }}
+              onResult={handleQrResult}
               containerStyle={{
                 width: '100%',
                 height: '100%',
@@ -91,7 +99,7 @@ const ScanQRCodePage = () => {
         </div>
         {/* Instruction */}
         <div className="font-medium text-center text-black text-base px-4 mb-6 mt-2" style={{ maxWidth: 330 }}>
-          Align the QR code within the frame to connect to the kiosk
+          Align the QR code within the frame to connect to the kiosk or open the upload page
         </div>
         {/* Need Help */}
         <button
