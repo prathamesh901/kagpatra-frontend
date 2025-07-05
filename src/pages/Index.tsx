@@ -1,9 +1,11 @@
-
+import React, { useEffect, useState } from "react";
 import { Printer, DollarSign } from "lucide-react";
 import ActionCard from "@/components/ActionCard";
 import PrintJobCard from "@/components/PrintJobCard";
 import TabBar from "@/components/TabBar";
 import { useNavigate } from "react-router-dom";
+import { auth, db } from "@/firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 const mockPrintJobs = [
   {
@@ -22,6 +24,28 @@ const mockPrintJobs = [
 
 const Index = () => {
   const navigate = useNavigate();
+  const [userName, setUserName] = useState<string>("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchName = async () => {
+      const user = auth.currentUser;
+      if (!user) {
+        setUserName("");
+        setLoading(false);
+        return;
+      }
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (userDoc.exists()) {
+        setUserName(userDoc.data().name || user.displayName || "User");
+      } else {
+        setUserName(user.displayName || "User");
+      }
+      setLoading(false);
+    };
+    fetchName();
+  }, []);
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 pt-5 pb-[64px] sm:pb-0">
       {/* Main content container */}
@@ -34,7 +58,9 @@ const Index = () => {
               <path d="M9 20c2.5-3.5 12-8.5 10.5 2" stroke="#4581F4" strokeWidth={2} strokeLinecap="round" />
             </svg>
           </div>
-          <h1 className="font-extrabold text-3xl text-black tracking-tight">Hi, Prathamesh!</h1>
+          <h1 className="font-extrabold text-3xl text-black tracking-tight">
+            Hi{loading ? "..." : userName ? `, ${userName}!` : "!"}
+          </h1>
         </div>
         <p className="text-gray-400 font-normal text-base mb-4">
           Welcome back to Kagpatra. Ready to print?

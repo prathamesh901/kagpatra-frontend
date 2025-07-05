@@ -38,7 +38,7 @@ const Onboarding = () => {
   const handleSkip = () => finish();
 
   const finish = () => {
-    navigate("/home");
+    navigate("/login");
   };
 
   return (

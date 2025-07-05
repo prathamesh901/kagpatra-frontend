@@ -17,6 +17,8 @@ import PrintConfirmationPage from "./pages/PrintConfirmationPage";
 import SplashScreen from "./pages/SplashScreen";
 import Onboarding from "./pages/Onboarding";
 import ViewReceiptPage from "./pages/ViewReceiptPage";
+import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +32,8 @@ const App = () => (
           {/* Splash and Onboarding routes */}
           <Route path="/" element={<SplashScreen />} />
           <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
           <Route path="/home" element={<Index />} />
           {/* Main app routes */}
           <Route path="/estimate" element={<EstimateCostPage />} />
